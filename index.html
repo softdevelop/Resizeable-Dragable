@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Index</title>
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i|Poppins:300,400,500,600,700" rel="stylesheet">
+	<!-- font-family: 'Open Sans', sans-serif; -->
+	<link rel="stylesheet" type="text/css" href="styles/bootstrap.min.css"/>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css"/>
+	<link rel="stylesheet" type="text/css" href="styles/style.css"/>
+</head>
+<body>
+	<div class="left_page animated">
+		<header class="main-header wrapper">
+			<nav class="navbar navbar-static-top" role="navigation">
+				<a href="#" class="sidebar-toggle-button" data-toggle="offcanvas" role="button">
+				   <i class="fa fa-navicon fa-2x"></i>
+				</a>
+			</nav>
+			<a href="#" class="logo">
+				<span class="logo-mini item-mini"><b>D</b>W</span>
+				<span class="logo-lg item-normal"><b>Demo </b> Widgets</span>
+			</a>
+		</header>
+		<div class="sidebar">
+		    <ul class="nav nav-sidebar">
+		        <li class="active">
+					<a href="#">
+						<span class="item-mini">OV </span>
+						<span class="item-normal">Overview </span>
+					</a>
+				</li>
+		        <li>
+					<a href="#">
+						<span class="item-mini">RP </span>
+						<span class="item-normal">Reports </span>
+					</a>
+				</li>
+		        <li>
+					<a href="#">
+						<span class="item-mini">AN </span>
+						<span class="item-normal">Analytics </span>
+					</a>
+				</li>
+		        <li>
+					<a href="#">
+						<span class="item-mini">EX </span>
+						<span class="item-normal">Export </span>
+					</a>
+				</li>
+		    </ul>
+		</div>
+	</div>
+	<div class="main_page">
+		<div id="sortable">
+
+		</div>
+	</div>
+
+	<script type="text/javascript" src="styles/jquery.js"></script>
+	<script type="text/javascript" src="styles/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+	<script type="text/javascript" src="js/data.js"></script>
+
+	<script type="text/javascript">
+		$(document).ready(function() {
+			var objBox = [];
+			var json_str = getCookie('objBox');
+			var box_html ="";
+			var arrPosition = [];
+
+			$(function() {
+				$( ".resizable" ).resizable({
+					minHeight: 404,
+					minWidth: 335
+				});
+			});
+
+			if (json_str == ''){
+				console.log('Chua co cookie');
+				// Get Data From Server
+				var database = databases; // Data
+				createBoxHtml(database, arrPosition);
+				var json_str_upload = JSON.stringify(objBox);
+		        document.cookie = "objBox="+ json_str_upload;
+			} else {
+				console.log('Da co cookie');
+				var arr = JSON.parse(json_str);
+				objBox = arr;
+				for (var i = 0; i < arr.length; i++) {
+					arrPosition[i] = arr[i].priority;
+				}
+				// Create html from cookie
+				createBoxHtml(arr, arrPosition);
+				for (var i = 0; i < arr.length; i++) {
+					if (arr[i] != null){
+						$(".box").eq(i).css("height", arr[arrPosition[i]].height);
+						$(".box").eq(i).css("width", arr[arrPosition[i]].width);
+					}
+				}
+			}
+
+			$("#sortable").sortable({
+	            revert: true,
+	            update: function(event, ui) {
+			  		$(this).sortable('refresh');
+			        $(this).sortable('refreshPositions')
+					arrPosition = $(this).sortable('toArray', {
+						attribute: 'id-item'
+					})
+					for (var i = 0; i < arrPosition.length; i++) {
+						objBox[i].priority = arrPosition[i];
+					}
+					var json_str_upload = JSON.stringify(objBox);
+		        	document.cookie = "objBox="+ json_str_upload;
+			  	}
+	        }); 
+
+
+			$(".box").on("resizestop", function(event, ui) {
+				var index = $(this).attr("id-item");
+				console.log(index);
+				if (objBox[index]!=null){
+					objBox[index].height = $(this).height();
+		        	objBox[index].width = $(this).width();
+				} else {
+					// objBox[index] = {height: $(this).height(), width: $(this).width()};
+				}
+		        
+		        var json_str_upload = JSON.stringify(objBox);
+		        document.cookie = "objBox="+ json_str_upload;
+			} );
+
+
+			function getCookie(cname) {
+			    var name = cname + "=";
+			    var ca = document.cookie.split(';');
+			    for(var i = 0; i < ca.length; i++) {
+			        var c = ca[i];
+			        while (c.charAt(0) == ' ') {
+			            c = c.substring(1);
+			        }
+			        if (c.indexOf(name) == 0) {
+			            return c.substring(name.length, c.length);
+			        }
+			    }
+			    return "";
+			}
+
+			function createBoxHtml(array, arrPosition){
+				console.log("Priority: " + arrPosition);
+				if (arrPosition != ""){
+					for (var i = 0; i < arrPosition.length; i++) {
+						box_html += '<div class="resizable box box-primary ui-widget-content" id-item="'+array[arrPosition[i]].id+'"><div class="box-header with-border"><h3 class="box-title">'+array[arrPosition[i]].title+'</h3></div><div class="box-body"><img style="width: 100%; height: auto;" src="'+array[arrPosition[i]].img+'"><p>'+array[arrPosition[i]].content+'</p></div></div>';
+					}
+					$('#sortable').html(box_html);
+				} else {
+					for (var i = 0; i < array.length; i++) {
+						objBox[i] = array[i];
+						arrPosition[i] = i;
+						box_html += '<div class="resizable box box-primary ui-widget-content" id-item="'+array[i].id+'"><div class="box-header with-border"><h3 class="box-title">'+array[i].title+'</h3></div><div class="box-body"><img style="width: 100%; height: auto;" src="'+array[i].img+'"><p>'+array[i].content+'</p></div></div>';
+					}
+					$('#sortable').html(box_html);
+					for (var i = 0; i < arrPosition.length; i++) {
+						objBox[i].priority = arrPosition[i];
+					}
+				}
+			}
+
+			$('#myTabs a').click(function (e) {
+				e.preventDefault()
+				$(this).tab('show')
+			});
+
+			$('.sidebar-toggle-button').click(function(e) {
+        		e.preventDefault();
+				$('body').toggleClass('sidebar-collapse');
+				//$('.left_page').toggleClass('slideInLeft');
+			});
+		});
+	</script>
+</body>
+</html>
