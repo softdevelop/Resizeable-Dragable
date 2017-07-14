@@ -4,3 +4,5 @@ Single page web application, there is vertical menu panel on the left, 200-250px
 In main screen there is 3 widgets(windows) .
 Can move this windows and resize them. BUT! Windows can’t be placed on each other! They must be side-by-side windows all the time. 
 Their position and size will be saved after reload.
+
+Online link: http://pacificsoftdev.com/resizeable-dragable/
